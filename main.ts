@@ -165,6 +165,12 @@ h1 { color: white; margin-bottom: 18px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3)
   display: none;
   text-align: left;
   position: relative;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.box.show {
+  display: block;
+  opacity: 1;
 }
 .close-btn {
   position: absolute;
@@ -194,7 +200,7 @@ h1 { color: white; margin-bottom: 18px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3)
 
   <div class="container">
     <div id="box" class="box">
-      <button class="close-btn" onclick="document.getElementById('box').style.display='none'">X</button>
+      <button class="close-btn">X</button>
     </div>
     <div id="error" class="error"></div>
   </div>
@@ -243,18 +249,30 @@ async function buildFingerprint() {
   return await sha256hex(raw);
 }
 
+const box = document.getElementById('box');
+const closeBtn = box.querySelector('.close-btn');
+
+function showBox() {
+  box.classList.add('show');
+}
+
+function hideBox() {
+  box.classList.remove('show');
+  setTimeout(()=>{ box.style.display='none'; }, 300);
+}
+
+closeBtn.addEventListener('click', hideBox);
+
 document.getElementById('generateBtn').addEventListener('click', async () => {
   const btn = document.getElementById('generateBtn');
-  const box = document.getElementById('box');
   const error = document.getElementById('error');
   error.textContent = '';
-  box.style.display = 'none';
+  box.classList.remove('show'); // reset box
   btn.disabled = true;
   btn.textContent = 'Generating…';
 
   try {
     const fingerprint = await buildFingerprint();
-
     if (localStorage.getItem('generated_on') === todayKey()) {
       error.textContent = '⚠️ You already generated today (client).';
       btn.disabled = false;
@@ -276,15 +294,18 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
       return;
     }
 
-    box.innerHTML += \`
+    box.innerHTML = \`
+      <button class="close-btn">X</button>
       <div class="line"><div class="label">Email</div><div class="value">\${data.email}</div><button class="copy" onclick="copyText('\${data.email}')">Copy</button></div>
       <div class="line"><div class="label">Password</div><div class="value">\${data.password}</div><button class="copy" onclick="copyText('\${data.password}')">Copy</button></div>
       <div class="line"><div class="label">CODE</div><div class="value">\${data.code}</div><button class="copy" onclick="copyText('\${data.code}')">Copy</button></div>
       <div class="line"><div class="label">Days Left</div><div class="value">\${data.days_left}</div></div>
       <div class="line"><div class="label">Expiry Date</div><div class="value">\${data.expiry}</div></div>
     \`;
-    box.style.display = 'block';
+    const newClose = box.querySelector('.close-btn');
+    newClose.addEventListener('click', hideBox);
 
+    showBox();
     localStorage.setItem('generated_on', todayKey());
     disableIfGenerated();
 
