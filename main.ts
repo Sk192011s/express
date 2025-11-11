@@ -196,7 +196,7 @@ h1 { color: white; margin-bottom: 18px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3)
 <div class="wrap">
   <h1>Express Giveaway</h1>
   <button class="btn" id="generateBtn">Generate</button>
-  <div class="note">You can generate once per day from the same device</div>
+  <div class="note">You can generate once per day from same device</div>
 
   <div class="container">
     <div id="box" class="box">
