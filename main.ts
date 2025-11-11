@@ -149,7 +149,12 @@ body {
   overflow-x: hidden;
 }
 .wrap { width: 92%; max-width: 460px; text-align: center; padding: 28px; }
-h1 { color: white; margin-bottom: 18px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+h1 { color: white; margin-bottom: 8px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+.top-note {
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.92);
+}
 .btn {
   background: white; color: #2563eb; border: none;
   padding: 12px 28px; border-radius: 10px; font-weight: 600; cursor: pointer;
@@ -190,11 +195,16 @@ h1 { color: white; margin-bottom: 18px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3)
 .copy { background:#2563eb; color:white; border:none; border-radius:6px; padding:6px 10px; cursor:pointer; margin-left:8px; }
 .error { color:#f87171; margin-top:12px; font-weight:600; }
 .note { margin-top:10px; color:rgba(255,255,255,0.92); font-size:13px; }
+.bottom-note { margin-top:20px; font-size:13px; color:rgba(255,255,255,0.92); }
+.bottom-note a { color:#facc15; text-decoration:underline; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Express Giveaway</h1>
+  <div class="top-note">
+    Accများ Device Limitပြည့်နေရင် Limit ကျော်သုံးနည်းကို YouTube မှာ ရှာကြည့်နိုင်ပါသည်
+  </div>
   <button class="btn" id="generateBtn">Generate</button>
   <div class="note">You can generate once per day from same device</div>
 
@@ -203,6 +213,10 @@ h1 { color: white; margin-bottom: 18px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3)
       <button class="close-btn">X</button>
     </div>
     <div id="error" class="error"></div>
+  </div>
+
+  <div class="bottom-note">
+    Presented By <a href="https://lugyi-app.deno.dev/" target="_blank">LuGyi App</a>
   </div>
 </div>
 
