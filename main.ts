@@ -136,62 +136,72 @@ serve(async (req) => {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Express Giveaway</title>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #1e3a8a, #2563eb, #3b82f6);
-    color: #111827;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  .wrap { width: 92%; max-width: 460px; text-align: center; padding: 28px; }
-  h1 { color: white; margin-bottom: 18px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
-  .btn {
-    background: white; color: #2563eb; border: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; cursor: pointer;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12); transition: 0.18s;
-  }
-  .btn:disabled { opacity: 0.6; transform: none; cursor: default; }
-  .container { margin-top: 18px; }
-  .box { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 6px 25px rgba(0,0,0,0.15); display: none; text-align: left; }
-  .line { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin:8px 0; }
-  .label { font-weight:700; color:#374151; width:38%; min-width:110px; }
-  .value { color:#111827; flex:1; word-break:break-all; }
-  .copy { background:#2563eb; color:white; border:none; border-radius:6px; padding:6px 10px; cursor:pointer; margin-left:8px; }
-  .error { color:#f87171; margin-top:12px; font-weight:600; }
-  .note { margin-top:10px; color:rgba(255,255,255,0.92); font-size:13px; }
-  #gifts { position: fixed; top: 0; left: 0; width: 100%; height: 0; pointer-events: none; overflow: visible; z-index:0; }
-  .gift { position:absolute; font-size:20px; color:#f59e0b; animation:floatUp linear; }
-  @keyframes floatUp { 0%{ transform: translateY(0) rotate(0); opacity:1 } 100%{ transform: translateY(-120vh) rotate(360deg); opacity:0 } }
+* { box-sizing: border-box; }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb, #3b82f6);
+  color: #111827;
+  margin: 0; padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.wrap { width: 92%; max-width: 460px; text-align: center; padding: 28px; }
+h1 { color: white; margin-bottom: 18px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+.btn {
+  background: white; color: #2563eb; border: none;
+  padding: 12px 28px; border-radius: 10px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12); transition: 0.18s;
+}
+.btn:disabled { opacity: 0.6; transform: none; cursor: default; }
+.container { margin-top: 18px; }
+.box {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+  display: none;
+  text-align: left;
+  position: relative;
+}
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: #f87171;
+  border: none;
+  color: white;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.line { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin:8px 0; }
+.label { font-weight:700; color:#374151; width:38%; min-width:110px; }
+.value { color:#111827; flex:1; word-break:break-all; }
+.copy { background:#2563eb; color:white; border:none; border-radius:6px; padding:6px 10px; cursor:pointer; margin-left:8px; }
+.error { color:#f87171; margin-top:12px; font-weight:600; }
+.note { margin-top:10px; color:rgba(255,255,255,0.92); font-size:13px; }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Express Giveaway</h1>
-    <button class="btn" id="generateBtn">Generate</button>
-    <div class="note">You can generate once per day from the same browser/device. (We use a lightweight device fingerprint + cookie.)</div>
+<div class="wrap">
+  <h1>Express Giveaway</h1>
+  <button class="btn" id="generateBtn">Generate</button>
+  <div class="note">You can generate once per day from the same browser/device. (We use a lightweight device fingerprint + cookie.)</div>
 
-    <div class="container">
-      <div id="box" class="box"></div>
-      <div id="error" class="error"></div>
+  <div class="container">
+    <div id="box" class="box">
+      <button class="close-btn" onclick="document.getElementById('box').style.display='none'">X</button>
     </div>
+    <div id="error" class="error"></div>
   </div>
-
-  <div id="gifts"></div>
+</div>
 
 <script>
-/*
- Client-side: build a simple fingerprint from browser characteristics,
- hash with SHA-256, then POST to /generate with { fingerprint }.
-*/
-
-function todayKey() {
-  return new Date().toISOString().split('T')[0];
-}
+function todayKey() { return new Date().toISOString().split('T')[0]; }
 
 function disableIfGenerated() {
   const stored = localStorage.getItem('generated_on');
@@ -210,12 +220,10 @@ async function sha256hex(str) {
   const enc = new TextEncoder();
   const data = enc.encode(str);
   const hash = await crypto.subtle.digest('SHA-256', data);
-  // convert to hex
   const bytes = new Uint8Array(hash);
   return Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-// Lightweight fingerprint string
 function rawFingerprintString() {
   const nav = navigator;
   const parts = [
@@ -232,8 +240,7 @@ function rawFingerprintString() {
 
 async function buildFingerprint() {
   const raw = rawFingerprintString();
-  const hash = await sha256hex(raw);
-  return hash;
+  return await sha256hex(raw);
 }
 
 document.getElementById('generateBtn').addEventListener('click', async () => {
@@ -248,7 +255,6 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
   try {
     const fingerprint = await buildFingerprint();
 
-    // quick client check
     if (localStorage.getItem('generated_on') === todayKey()) {
       error.textContent = '⚠️ You already generated today (client).';
       btn.disabled = false;
@@ -270,8 +276,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
       return;
     }
 
-    // success
-    box.innerHTML = \`
+    box.innerHTML += \`
       <div class="line"><div class="label">Email</div><div class="value">\${data.email}</div><button class="copy" onclick="copyText('\${data.email}')">Copy</button></div>
       <div class="line"><div class="label">Password</div><div class="value">\${data.password}</div><button class="copy" onclick="copyText('\${data.password}')">Copy</button></div>
       <div class="line"><div class="label">CODE</div><div class="value">\${data.code}</div><button class="copy" onclick="copyText('\${data.code}')">Copy</button></div>
@@ -280,18 +285,14 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     \`;
     box.style.display = 'block';
 
-    // mark localStorage until midnight
     localStorage.setItem('generated_on', todayKey());
     disableIfGenerated();
-
-    // set client-side small gift burst
-    for (let i=0;i<6;i++) createGift();
 
     btn.disabled = true;
     btn.textContent = 'Generated (today)';
   } catch (e) {
     console.error(e);
-    document.getElementById('error').textContent = 'Network error — try again';
+    error.textContent = 'Network error — try again';
     btn.disabled = false;
     btn.textContent = 'Generate';
   }
@@ -300,19 +301,6 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
 function copyText(text) {
   navigator.clipboard.writeText(text).then(()=>{ alert('Copied!'); });
 }
-
-/* Floating gifts */
-function createGift() {
-  const g = document.createElement('div');
-  g.className = 'gift';
-  g.textContent = '🎁';
-  g.style.left = Math.random()*100 + 'vw';
-  g.style.fontSize = 12 + Math.random()*28 + 'px';
-  g.style.animationDuration = 3 + Math.random()*5 + 's';
-  document.getElementById('gifts').appendChild(g);
-  setTimeout(()=>g.remove(), 9000);
-}
-setInterval(createGift, 700);
 </script>
 </body>
 </html>`;
