@@ -7,12 +7,13 @@ interface Account {
   expiry: string;
 }
 
-// File read
+// Read account list from JSON file
 const accounts: Account[] = JSON.parse(await Deno.readTextFile("accounts.json"));
 
-// Store daily users (reset every 24h)
+// Track which IPs have generated today
 const userAccess: Record<string, string> = {};
 
+// Calculate days left
 function daysLeft(expiry: string): number {
   const today = new Date();
   const exp = new Date(expiry);
@@ -23,18 +24,19 @@ function daysLeft(expiry: string): number {
 serve(async (req) => {
   const url = new URL(req.url);
 
+  // API endpoint for generating an account
   if (url.pathname === "/generate") {
     const ip = req.headers.get("x-forwarded-for") || "unknown";
     const today = new Date().toDateString();
 
-    // check daily limit
+    // Limit user to 1 per day
     if (userAccess[ip] === today) {
-      return new Response(JSON.stringify({ error: "You can only generate once per day!" }), {
+      return new Response(JSON.stringify({ error: "⚠️ You can only generate once per day. Please try again tomorrow." }), {
         headers: { "content-type": "application/json" },
       });
     }
 
-    // random account
+    // Pick random account
     const acc = accounts[Math.floor(Math.random() * accounts.length)];
     const left = daysLeft(acc.expiry);
 
@@ -52,7 +54,7 @@ serve(async (req) => {
     );
   }
 
-  // HTML UI
+  // Main UI page
   if (url.pathname === "/") {
     const html = `
 <!doctype html>
@@ -62,20 +64,100 @@ serve(async (req) => {
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ExpressVPN Giveaway</title>
 <style>
-  body { font-family: Poppins, sans-serif; background: #f3f4f6; text-align: center; padding: 40px; }
-  .btn { background: #2563eb; color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; }
-  .btn:hover { background: #1e40af; }
-  .box { background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 25px; width: 350px; margin: 30px auto; display: none; text-align: left; }
-  .line { margin: 10px 0; font-weight: 500; }
-  .copy { color: #2563eb; cursor: pointer; font-size: 14px; margin-left: 8px; }
-  .error { color: red; font-weight: bold; margin-top: 20px; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb, #3b82f6);
+    color: #111827;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  h1 {
+    color: white;
+    margin-bottom: 25px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  }
+  .btn {
+    background: white;
+    color: #2563eb;
+    border: none;
+    padding: 14px 36px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 17px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: 0.25s;
+  }
+  .btn:hover {
+    background: #f3f4f6;
+    transform: scale(1.03);
+  }
+  .container {
+    width: 90%;
+    max-width: 420px;
+    margin-top: 25px;
+  }
+  .box {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+    display: none;
+    animation: fadeIn 0.5s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .line {
+    margin: 10px 0;
+    font-size: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .label {
+    font-weight: 600;
+    color: #374151;
+  }
+  .value {
+    color: #111827;
+    word-break: break-all;
+  }
+  .copy {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-left: 8px;
+  }
+  .copy:hover { background: #1e40af; }
+  .error {
+    color: #f87171;
+    font-weight: bold;
+    margin-top: 15px;
+  }
 </style>
 </head>
 <body>
   <h1>🎁 ExpressVPN Account Giveaway</h1>
   <button class="btn" id="generateBtn">Generate</button>
-  <div id="box" class="box"></div>
-  <div id="error" class="error"></div>
+
+  <div class="container">
+    <div id="box" class="box"></div>
+    <div id="error" class="error"></div>
+  </div>
+
 <script>
 document.getElementById('generateBtn').onclick = async () => {
   const res = await fetch('/generate');
@@ -88,11 +170,11 @@ document.getElementById('generateBtn').onclick = async () => {
   } else {
     error.textContent = '';
     box.innerHTML = \`
-      <div class='line'><b>Email:</b> \${data.email} <span class='copy' onclick='copyText("\${data.email}")'>Copy</span></div>
-      <div class='line'><b>Password:</b> \${data.password} <span class='copy' onclick='copyText("\${data.password}")'>Copy</span></div>
-      <div class='line'><b>CODE:</b> \${data.code} <span class='copy' onclick='copyText("\${data.code}")'>Copy</span></div>
-      <div class='line'><b>Days Left:</b> \${data.days_left}</div>
-      <div class='line'><b>Expiry Date:</b> \${data.expiry}</div>
+      <div class='line'><span class='label'>Email:</span> <span class='value'>\${data.email}</span> <button class='copy' onclick='copyText("\${data.email}")'>Copy</button></div>
+      <div class='line'><span class='label'>Password:</span> <span class='value'>\${data.password}</span> <button class='copy' onclick='copyText("\${data.password}")'>Copy</button></div>
+      <div class='line'><span class='label'>CODE:</span> <span class='value'>\${data.code}</span> <button class='copy' onclick='copyText("\${data.code}")'>Copy</button></div>
+      <div class='line'><span class='label'>Days Left:</span> <span class='value'>\${data.days_left}</span></div>
+      <div class='line'><span class='label'>Expiry Date:</span> <span class='value'>\${data.expiry}</span></div>
     \`;
     box.style.display = 'block';
   }
@@ -100,7 +182,7 @@ document.getElementById('generateBtn').onclick = async () => {
 
 function copyText(text) {
   navigator.clipboard.writeText(text);
-  alert('Copied!');
+  alert('Copied to clipboard!');
 }
 </script>
 </body>
