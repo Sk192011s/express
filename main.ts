@@ -71,7 +71,7 @@ serve(async (req) => {
       nextTs.setDate(nextTs.getDate() + 1);
       nextTs.setHours(0, 0, 0, 0);
       return new Response(JSON.stringify({
-        error: "⚠️ You already generated today (cookie). Try again tomorrow.",
+        error: "⚠️ You already generated today. Try again tomorrow.",
         nextAllowed: nextTs.toISOString(),
       }), { headers: { "content-type": "application/json" } });
     }
@@ -82,7 +82,7 @@ serve(async (req) => {
       nextTs.setDate(nextTs.getDate() + 1);
       nextTs.setHours(0, 0, 0, 0);
       return new Response(JSON.stringify({
-        error: "⚠️ You already generated today (device). Try again tomorrow.",
+        error: "⚠️ You already generated today. Try again tomorrow.",
         nextAllowed: nextTs.toISOString(),
       }), { headers: { "content-type": "application/json" } });
     }
@@ -93,7 +93,7 @@ serve(async (req) => {
       nextTs.setDate(nextTs.getDate() + 1);
       nextTs.setHours(0, 0, 0, 0);
       return new Response(JSON.stringify({
-        error: "⚠️ You already generated today (network). Try again tomorrow.",
+        error: "⚠️ You already generated today. Try again tomorrow.",
         nextAllowed: nextTs.toISOString(),
       }), { headers: { "content-type": "application/json" } });
     }
@@ -196,7 +196,7 @@ h1 { color: white; margin-bottom: 18px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3)
 <div class="wrap">
   <h1>Express Giveaway</h1>
   <button class="btn" id="generateBtn">Generate</button>
-  <div class="note">You can generate once per day from the same browser/device. (We use a lightweight device fingerprint + cookie.)</div>
+  <div class="note">You can generate once per day from the same device</div>
 
   <div class="container">
     <div id="box" class="box">
