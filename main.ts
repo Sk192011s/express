@@ -62,7 +62,7 @@ serve(async (req) => {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ExpressVPN Giveaway</title>
+<title>Express Giveaway</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -76,6 +76,7 @@ serve(async (req) => {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    overflow-x: hidden;
   }
   h1 {
     color: white;
@@ -147,16 +148,40 @@ serve(async (req) => {
     font-weight: bold;
     margin-top: 15px;
   }
+
+  /* Floating gift animation */
+  #gifts {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .gift {
+    position: absolute;
+    font-size: 20px;
+    color: #f59e0b;
+    animation: floatUp 5s linear infinite;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0) rotate(0deg); opacity:1; }
+    100% { transform: translateY(-120vh) rotate(360deg); opacity:0; }
+  }
 </style>
 </head>
 <body>
-  <h1>🎁 ExpressVPN Account Giveaway</h1>
+  <h1>Express Giveaway</h1>
   <button class="btn" id="generateBtn">Generate</button>
 
   <div class="container">
     <div id="box" class="box"></div>
     <div id="error" class="error"></div>
   </div>
+
+  <!-- Floating gift boxes -->
+  <div id="gifts"></div>
 
 <script>
 document.getElementById('generateBtn').onclick = async () => {
@@ -184,6 +209,19 @@ function copyText(text) {
   navigator.clipboard.writeText(text);
   alert('Copied to clipboard!');
 }
+
+// Floating gift boxes
+function createGift() {
+  const gift = document.createElement('div');
+  gift.className = 'gift';
+  gift.textContent = '🎁';
+  gift.style.left = Math.random() * 100 + 'vw';
+  gift.style.fontSize = 15 + Math.random()*25 + 'px';
+  gift.style.animationDuration = 3 + Math.random()*4 + 's';
+  document.getElementById('gifts').appendChild(gift);
+  setTimeout(() => gift.remove(), 7000);
+}
+setInterval(createGift, 700);
 </script>
 </body>
 </html>`;
