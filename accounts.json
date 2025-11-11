@@ -1,20 +1,26 @@
 [
   {
-    "email": "hytfd8@vpnwayz.top",
-    "password": "1234567#",
+    "email": "freevpn1@vpnwayz.top",
+    "password": "Pass#1234",
     "code": "EA5GMNZTYAB59ENKJNPXY7M",
     "expiry": "2025-11-29"
   },
   {
-    "email": "xyj82@vpnwayz.top",
-    "password": "exp12345#",
-    "code": "RZ4GMN7TYBB59ENKJNPXY7Z",
-    "expiry": "2025-11-30"
+    "email": "freevpn2@vpnwayz.top",
+    "password": "Secure#888",
+    "code": "PLKQWERTY1234ZXCVBNM",
+    "expiry": "2025-11-26"
   },
   {
-    "email": "freevpn@vpnwayz.top",
-    "password": "vPp_!234",
-    "code": "QA9GMN7TYBB59ENKJNPXY8A",
-    "expiry": "2025-12-01"
+    "email": "freevpn3@vpnwayz.top",
+    "password": "Myp@ssword7",
+    "code": "CODE99999ABCDE123456",
+    "expiry": "2025-11-22"
+  },
+  {
+    "email": "freevpn4@vpnwayz.top",
+    "password": "TopVIP#555",
+    "code": "KEYABCDE1234567890XY",
+    "expiry": "2025-12-02"
   }
 ]
